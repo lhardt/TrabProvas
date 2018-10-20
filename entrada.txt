@@ -1,0 +1,62 @@
+1 F A alocação dinâmica é o processo que:
+a aloca memória em tempo de execução
+b limpa a memória antes de iniciar a execução
+c aloca espaço antes de executar
+d limpa um ponteiro
+
+2 F Algumas funções para a alocação dinâmica são:
+a malloc(), calloc(), realloc() e free()
+b malloc(), calloc(), relloc() e free()
+c bytealloc(), vetalloc(), e free
+d malloc(), sifeof(), e calloc()
+
+3 F Qual o principal objetivo do uso da alocação dinâmica?
+a Evitar o desperdício de memória
+b Diminuir a quantidade de linhas do código
+c Alocar uma função
+d Evitar a repetição de funções no programa
+
+4 F Sobre as funções malloc() e calloc(), qual a alternativa que melhor descreve a utilidade de cada uma?
+a malloc() aloca n bytes para o vetor e calloc() aloca um vetor com n posições de tamanho determinado
+b malloc() aloca um vetor com n posições de tamanho determinado e calloc() aloca n bytes para o vetor 
+c malloc() aloca um ponteiro e calloc() aloca n bytes para o vetor
+d malloc() aloca n bytes para o vetor e calloc() aloca uma única posição para um ponteiro
+
+5 F Qual alternativa contém uma linha de código válida?
+a v =(int*) calloc (n,sizeof(int));
+b v =(int*) calloc (n*sizeof(int));
+c v =(*int) calloc (n,sizeof(int));
+d v =(*int) malloc (n*sizeof(int));
+
+1 D Dentre os números que podemos substituir em __valor__ no código abaixo, quais compilam?
+
+#include <stdio.h>
+
+#define PTR_TO(x) (*(x))
+#define REPTR_TO(x) (&(x))
+#define PTR_REPTR(x) REPTR_TO(PTR_TO(x))
+#define REPTR_PTR(x) PTR_TO(REPTR_TO(x))
+
+#define OPCAO (__valor__)
+
+int main(){
+	int x = 10;
+#if OPCAO == 1
+	printf("opção a: %x\n", PTR_REPTR(x));
+#endif
+#if OPCAO == 2
+	printf("opção b: %x\n", REPTR_PTR(x));
+#endif
+#if OPCAO == 3
+	printf("opção c: %x\n", REPTR_TO(x));
+#endif
+#if OPCAO == 4
+	printf("opção d: %x\n", PTR_TO(x))
+#endif
+	return 0;
+}
+
+a Nenhuma das outras alternativas
+b Somente 1 e 2
+c Somente 2 e 4
+d Somente 1 e 4
