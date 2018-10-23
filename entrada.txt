@@ -202,3 +202,8 @@ III - PTR / PTR / REPTR
 IV - REPTR/ VAL / PTR
 V -  VAL / VAL / REPTR_PTR 
 
+a Somente III e V
+b Somente II e III
+c Todas as alternatias
+d Nenhuma das alternativas
+
