@@ -10,7 +10,7 @@ b malloc(), calloc(), relloc() e free()
 c bytealloc(), vetalloc(), e free
 d malloc(), sifeof(), e calloc()
 
-3 F Qual o principal objetivo do uso da alocação dinâmica?
+3 F O que pode ser considerado um grande argumento a favor da alocação dinâmica de memória?
 a Evitar o desperdício de memória
 b Diminuir a quantidade de linhas do código
 c Alocar uma função
@@ -28,35 +28,177 @@ b v =(int*) calloc (n*sizeof(int));
 c v =(*int) calloc (n,sizeof(int));
 d v =(*int) malloc (n*sizeof(int));
 
-1 D Dentre os números que podemos substituir em __valor__ no código abaixo, quais compilam?
+1 M Escolha a opção que substitui, em ordem, cada "@" no trecho de código, para que seja alocada dinamicamente uma matriz.
+	int main() {
+		int @mat, x;
+	
+		printf ("Informe a quantidade de linhas e colunas: ");
+		scanf ("%d %d", &lin, &col);	
 
-#include <stdio.h>
+		mat = (@) malloc (lin @ sizeof (@));
+	
+		for (x=0;x<lin;x++) {
+			@ = (@) malloc (lin@ sizeof (@));
+		}
+	}
+a ** / int** / * / int* / mat[x] / int* / * / int
+b ** / int* / * / int / *mat / int** / */ int* 
+c * / int**/ , / int/ **mat / int** / , / int*
+d * / int*/ , / int* / mat[x] / int* / , / int
 
-#define PTR_TO(x) (*(x))
-#define REPTR_TO(x) (&(x))
-#define PTR_REPTR(x) REPTR_TO(PTR_TO(x))
-#define REPTR_PTR(x) PTR_TO(REPTR_TO(x))
+2 M Analise o código e selecione a opção que corresponde ao seu resultado após compilação.
 
-#define OPCAO (__valor__)
+	void dois (int mat[3][3], int lin, int col,int x, int y) {
+		for (x=0; x<lin; x++) {
+			for (y=0;y<col;y++)
+				mat[x][y] = x+y;
+		}
+	}
+	int main() {
+		int **mat, lin=3,col=3,x,y;
 
-int main(){
-	int x = 10;
-#if OPCAO == 1
-	printf("opção a: %x\n", PTR_REPTR(x));
-#endif
-#if OPCAO == 2
-	printf("opção b: %x\n", REPTR_PTR(x));
-#endif
-#if OPCAO == 3
-	printf("opção c: %x\n", REPTR_TO(x));
-#endif
-#if OPCAO == 4
-	printf("opção d: %x\n", PTR_TO(x))
-#endif
-	return 0;
-}
+		printf ("Informe a quantidade de linhas e colunas: ");
+		scanf ("%d %d", &lin, &col);	
+	
+		mat = (int**) malloc (lin * sizeof (int*));
+		
+		for (x=0;x<lin;x++) {
+			mat[x] = (int*) malloc (lin * sizeof (int));
+		}
+		dois (mat,lin, col,x,y);
+		for (x=0; x<lin; x++) {
+			for (y=0;y<col;y++) {
+				mat[x][y] = x-y;
+				printf ("%d ", mat[x][y]);
+			}
+		}
+	}
+
+a ERRO. A inserção de dados na matriz mat na função dois corrompe os dados da matriz mat na função main.
+b ERRO. Não é possível realizar passagem de uma matriz de ponteiros sem utilizar ponteiros.
+c ARQUIVO COMPILADO. A saída de dados foi: 0  -1  -2  1  0  -1  2  1 0
+d ARQUIVO COMPILADO. A saída de dados foi: 0  1  2  1  2  3  2  3  4
+
+
+3 M Observe os trechos de código e escolha a frase que corresponda aos erros de cada um.
+I - int *um;
+    um = (int*) malloc (1*sizeof(int));
+    um[0] = 1;
+    um = NULL;
+II - char tres;
+      *tres = '3'; 
+III - int *dois;
+     dois = (int*) malloc (2*sizeof(int));
+     free (dois);
+     dois[0] = 2;
+
+X - O ponteiro não foi inicializado com um conteúdo válido.
+Y - Dados salvos na memória, mas não acessível ao programa.
+Z - Dado não puderam ser guardados na memória.
+a I - Y, II - X, III - Z;
+b I - Y, II - Z, III - X;
+c I - X, II - Y, III - Z;
+d I - Z, II - X, III - Y;
+
+4 M Que tipos de dados podemos substituir em '@':
+int main() {
+        @ *ptr;
+        ptr = (@ *) malloc(sizeof(@));
+        return 0;
+    }
+
+a Todos tipos mencionados
+b int
+c unsigned long long int
+d char* 
+
+5 M Assinale verdadeiro (V) ou falso (F).
+
+( ) Se malloc() alocar memória com sucesso ela retorna o número de bytes alocado.
+( ) calloc(n, sizeof()) retorna um ponteiro int se a memória é alocada para guardar int's e um ponteiro float se for alocada para guardar float's.
+( ) Se ptr é um ponteiro NULL, o uso de realloc() será equivalente ao uso de malloc().
+
+a F / F / V
+b V / V / F
+c F / F / F
+d V / F / V
+
+1 D Dentre as expressões as quais podem substituir "@" no código abaixo, quais compilam?
+
+	#include <stdio.h>
+	
+	#define PTR_TO (*(x))
+	#define REPTR_TO (&(x))
+	#define PTR_REPTR REPTR_TO(PTR_TO(x))
+	#define REPTR_PTR PTR_TO(REPTR_TO(x))
+	
+	int main(){
+		int x = 10;
+		printf("opção a: %x\n", @);
+		return 0;
+	}
+
+I - PTR_REPTR
+II - REPTR_PTR
+III - REPTR_TO
+IV - PTR_TO
 
 a Nenhuma das outras alternativas
 b Somente 1 e 2
 c Somente 2 e 4
 d Somente 1 e 4
+
+2 D Quando aplicamos free() a um ponteiro alocado dinamicamente, ele deve apontar para:
+
+a O local de memória que foi liberado.
+b Outro ponteiro dinamicamente alocada.
+c Aponta para a localização com a qual ele foi inicializado.
+d NULL
+
+3 D Após aplicamos free() a um ponteiro que aponta para uma lista alocada a tempo de compilação, ele agora deve apontar para:
+
+a O programa para de funcionar.
+b Outra memória dinâmicamente alocada.
+c Aponta para a localização com a qual ele foi inicializado.
+d NULL
+
+4 D Considerando o que aprendeu com ponteiros, sobre o código abaixo, quais afirmativas são verdadeiras?
+	#include <stdio.h>
+	int main(){
+		int x;
+		scanf("%d", x);
+		return 0;
+	}
+
+I - a função scanf necessita que o programador passe uma variável por referência, para que possa modificá-la;
+II - a função scanf tenta reescrever o endereço de x e por isso o programa tem comportamento indefinido;
+III - a função scanf interpreta x como ponteiro, logo, o programa compila.
+IV - o programa roda desde que o usuário digite um inteiro
+
+a Somente I e III
+b Somente II e IV
+c Somente IV
+d Somente II
+
+5 D Dentre as expressões as quais podem substituir "@" no código abaixo, quais compilam?
+
+	#include <stdio.h>
+	
+	#define VAL 
+	#define PTR *
+	#define REPTR &
+	#define PTR_REPTR  REPTR PTR
+	#define REPTR_PTR PTR REPTR
+	
+	int main(){
+		int x = 10;
+		int @ y = (int @) @ x;
+		return 0;
+	}
+
+I - REPTR / int * / REPTR
+II - PTR / int * / REPTR
+III - PTR / PTR / REPTR
+IV - REPTR/ VAL / PTR
+V -  VAL / VAL / REPTR_PTR 
+
