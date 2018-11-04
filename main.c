@@ -1,4 +1,10 @@
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
+
+/* Tamanho máximo de uma linha da entrada */
+#define TAM_MAX_LINHA 255
 
 struct Questao {
 	/* Título da questão */
@@ -9,6 +15,32 @@ struct Questao {
 	char * alternativas[4];
 	char dificuldade;
 };
+
+/* Função auxiliar, como a fpeek do C++.
+ * 'Espia' como será o próximo caracter de um arquivo.
+ * Autor: Léo H.;
+ */
+int fpeek( FILE * stream ) {
+    int c;
+    c = fgetc(stream);
+    ungetc(c, stream);
+    return c;
+}
+
+/* Se o caracter é o cabeçalho de uma alternativa (a, b, c, ou d)
+ *
+ * Autor: Léo H.;
+ */
+int isAlternativa( char diff ){
+	switch( diff ) {
+		case 'a':
+		case 'b':
+		case 'c':
+		case 'd':
+			return 1;
+	}
+	return 0;
+}
 /* 
 	A alternativa, no arquivo, é uma letra. Mas conceitualmente é um número.
 	A função é uma conversão entre as duas.
@@ -17,11 +49,83 @@ struct Questao {
 	Autor: Luisa;
 */
 int charParaAlternativa( char diff );
+
+/* Lê até que encontre uma nova linha com um dígito (uma nova questão)
+ * ou uma letra (uma nova alternativa).
+ *
+ * Autor: Léo H.
+ */
+char * ateNovoToken(FILE * f) {
+	int strSz = 1, strLen = 0, i = 0;
+	char * str = calloc(strSz, sizeof(char));
+	char * linha = calloc( TAM_MAX_LINHA, sizeof(char));
+	str[0] = 0;
+	do {
+		fgets(linha, TAM_MAX_LINHA, f);
+		strLen += strlen(linha);
+		str = realloc(str, 1 +strLen);
+		strcat(str, linha);
+	} while( !feof(f) && !isdigit(fpeek(f)) && !isAlternativa(fpeek(f)) );
+
+	for(i = strLen - 1; i > 0; i-- ){
+		if(!isprint(str[i]))
+			str[i] = '\0';
+		else break;
+	}
+	free(linha);
+	return str;
+}
+
+
 /* Ler de um arquivo as questões 
 	
 	Autor: ;
 */
-void doArquivo(struct Questao ** vetQuestoes, int * qtdQuestoes);
+void doArquivo(struct Questao ** vetQuestoes, int * qtdQuestoes){
+	FILE * entrada = fopen("entrada.txt", "r");
+	*qtdQuestoes = 0;
+	if( entrada != NULL ){
+		/* Só para encaixar no scanf. O número da questão aqui é sem propósito. */
+		int dummy = 0;
+		/* Em qual questão o programa opera atualmente */
+		int itQst = 0;
+		/* Quantas questões foram alocadas no vetQuestoes. */
+		int numQstAlocado = 10;
+		/* Porque vetQuestoes não foi inicializado como vetor, o inicializamos. */
+		*vetQuestoes = calloc(numQstAlocado,sizeof(struct Questao));
+		while( !feof(entrada) ){
+			/* Expandir o vetor se necessário */
+			if( itQst >= numQstAlocado -1 ){
+				numQstAlocado += 10;
+				*vetQuestoes = realloc(*vetQuestoes, numQstAlocado * sizeof(struct Questao));
+				if( *vetQuestoes == NULL ) {
+					printf("Sem memória! Encerrando o programa...\n");
+					exit(-1);
+				}
+			}
+			fscanf(entrada, "%d %c ", &dummy, &((*vetQuestoes)[itQst]).dificuldade);
+			fflush(entrada);
+			(*vetQuestoes)[itQst].enunciado = ateNovoToken(entrada);
+			(*vetQuestoes)[itQst].alternativas[0] = ateNovoToken(entrada);
+			(*vetQuestoes)[itQst].alternativas[1] = ateNovoToken(entrada);
+			(*vetQuestoes)[itQst].alternativas[2] = ateNovoToken(entrada);
+			(*vetQuestoes)[itQst].alternativas[3] = ateNovoToken(entrada);
+
+			itQst++;
+		}
+		*qtdQuestoes = itQst;
+		fclose(entrada);
+	} else {
+		*vetQuestoes = 0;
+	}
+}
+
+/* Limpa o vetor de questões do programa.
+ *
+ *	Autor: ;
+ */
+void freeQuestoes();
+
 /* Ler a quantidade de questões do usuário
 	
 	Autor: ;
@@ -46,7 +150,15 @@ void embaralharAlternativas( struct Questao * questoes );
 
 int main(){
 	struct Questao * questoes;
-	// Pegar os dados	
+	int qtdQuestoes;
+	
+	doArquivo(&questoes, &qtdQuestoes);
+	if( qtdQuestoes != 0 ){
+		// ...
+	} else {
+		// erro no arquivo
+	}
+	// freeQuestoes( questoes );
 	
 	return 0;
 }
