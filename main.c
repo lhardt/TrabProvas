@@ -46,7 +46,7 @@ int isAlternativa( char diff ){
 	A função é uma conversão entre as duas.
 	Ex de conversão: a=0, b=1, c=2, d=3
 
-	Autor: Luisa;
+	Autor: Luísa;
 */
 int charParaAlternativa( char diff )
 {
@@ -121,7 +121,7 @@ void doArquivo(struct Questao ** vetQuestoes, int * qtdQuestoes){
 					exit(-1);
 				}
 			}
-			fscanf(entrada, "%d %c ", &dummy, &((*vetQuestoes)[itQst]).dificuldade);
+			fscanf(entrada, "%d %c", &dummy, &((*vetQuestoes)[itQst]).dificuldade);
 			fflush(entrada);
 			(*vetQuestoes)[itQst].enunciado = ateNovoToken(entrada);
 			(*vetQuestoes)[itQst].alternativas[0] = ateNovoToken(entrada);
@@ -140,17 +140,25 @@ void doArquivo(struct Questao ** vetQuestoes, int * qtdQuestoes){
 
 /* Limpa o vetor de questões do programa.
  *
- *	Autor: ;
+ *	Autor: Luísa ;
  */
-void freeQuestoes();
+void freeQuestoes(questoes, str, vetQuestoes)
+{
+	free(questoes);
+	free(str);
+	free(vetQuestoes);
+}
 
 /* Ler a quantidade de questões do usuário
 	
-	Autor: ;
+	Autor: Luísa;
 */
-int lerQuantQuestoes();
+int lerQuantQuestoes(qtdQuestoes[])
+{
+	// ainda nao fiz kk
+}
 /* A ordem das questões. Use como o índice da lista
-	
+	 
 	Autor: ;
 */
 int * criarOrdemAleatoria();
@@ -168,15 +176,26 @@ void embaralharAlternativas( struct Questao * questoes );
 
 int main(){
 	struct Questao * questoes;
-	int qtdQuestoes;
+	int qtdQuestoes[3]; 
 	
+	printf("Informe a quantidade de questões: \n");
+	printf("Nível Fácil: ");
+	scanf("%d", &qtdQuestoes[0]);
+	printf("Nível Médio: ");
+	scanf("%d", &qtdQuestoes[1]);	
+	printf("Nível Difícil: ");
+	scanf("%d", &qtdQuestoes[2]);
+		
 	doArquivo(&questoes, &qtdQuestoes);
-	if( qtdQuestoes != 0 ){
-		// ...
-	} else {
-		// erro no arquivo
+	if( qtdQuestoes != 0)
+	{
+		//...
 	}
-	// freeQuestoes( questoes );
+	else
+	{
+		printf("Erro no arquivo");
+	}
+	freeQuestoes (questoes, str, vetQuestoes);
 	
 	return 0;
 }
