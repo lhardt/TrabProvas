@@ -100,7 +100,7 @@ char * ateNovoToken(FILE * f) {
 	Autor: ;
 */
 void doArquivo(struct Questao ** vetQuestoes, int * qtdQuestoes){
-	FILE * entrada = fopen("entrada.txt", "r");
+	FILE * entrada = fopen("entrada.txt", "rt");
 	*qtdQuestoes = 0;
 	if( entrada != NULL ){
 		/* Só para encaixar no scanf. O número da questão aqui é sem propósito. */
