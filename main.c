@@ -48,7 +48,25 @@ int isAlternativa( char diff ){
 
 	Autor: Luisa;
 */
-int charParaAlternativa( char diff );
+int charParaAlternativa( char diff )
+{
+	switch(diff)
+	{
+		case 'a':
+			diff = 0;
+			break;
+		case 'b':
+			diff = 1;
+			break;
+		case 'c':
+			diff = 2;
+			break;
+		case 'd':
+			diff = 3;
+			break;
+	}	
+	return diff;
+}
 
 /* Lê até que encontre uma nova linha com um dígito (uma nova questão)
  * ou uma letra (uma nova alternativa).
