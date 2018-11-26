@@ -41,11 +41,10 @@ int isAlternativa( char diff ){
 	}
 	return 0;
 }
-/* 
+/*
 	A alternativa, no arquivo, é uma letra. Mas conceitualmente é um número.
 	A função é uma conversão entre as duas.
 	Ex de conversão: a=0, b=1, c=2, d=3
-
 	Autor: Luísa;
 */
 int charParaAlternativa( char diff )
@@ -64,7 +63,7 @@ int charParaAlternativa( char diff )
 		case 'd':
 			diff = 3;
 			break;
-	}	
+	}
 	return diff;
 }
 
@@ -95,9 +94,9 @@ char * ateNovoToken(FILE * f) {
 }
 
 
-/* Ler de um arquivo as questões 
-	
-	Autor: ;
+/* Ler de um arquivo as questões
+
+	Autor: Léo H.
 */
 void doArquivo(struct Questao ** vetQuestoes, int * qtdQuestoes){
 	FILE * entrada = fopen("entrada.txt", "rt");
@@ -136,57 +135,97 @@ void doArquivo(struct Questao ** vetQuestoes, int * qtdQuestoes){
 	} else {
 		*vetQuestoes = 0;
 	}
+	
+	printf ("\nNo doArquivo:");
+	puts ((*vetQuestoes)[0].enunciado);
 }
 
-/* Limpa o vetor de questões do programa.
- *
- *	Autor: Luísa ;
- */
-void freeQuestoes(questoes, str, vetQuestoes)
+/* A ordem das questões e das alternativas. Use como o índice da lista
+
+	Autor: Ana;
+*/
+int *criarOrdemAleatoria(int numItens, int numMin, int numMax)
 {
-	free(questoes);
-	free(str);
-	free(vetQuestoes);
-}
-
-/* Ler a quantidade de questões do usuário
+	srand((unsigned)time(NULL));
 	
-	Autor: Luísa;
+    int y,x,*usado,*novo_indice;
+
+    usado = calloc(numItens, sizeof(int));
+    novo_indice = malloc(numItens*sizeof(int));
+
+	for (x=0;x<numItens;x++)//enquanto x< que a quant de nueros pedidos
+	{
+		novo_indice[x] = numMin+ (rand() % numMax-numMin);//sorteia numero entre o minimo e maximo
+	    do
+	    {
+	        usado[x]=0;
+	        for (y=0;y<x;y++)
+	        {
+	        	if (novo_indice[x]==novo_indice[y]){//se já tiver numero igual no vetor
+	        		usado[x] = 1;//significa tem igual, pra usar no do-while
+	        		novo_indice[x] = numMin+ (rand() % numMax-numMin);//sorteia de novo
+					//break;???
+				}
+			}
+            
+	    }while(usado[x]==1);
+	}
+	
+    return  novo_indice;//retorna o novo indice embaralhado
+
+}
+/* Embaralha os structs com alternativas (1 por vez)
+
+	Autor: Ana;
 */
-int lerQuantQuestoes(qtdQuestoes[])
+void embaralharAlternativas(struct Questao *pQuestao)
 {
-	// ainda nao fiz kk
-}
-/* A ordem das questões. Use como o índice da lista
-	 
-	Autor: ;
-*/
-int * criarOrdemAleatoria();
-/* Coloca uma lista de questões no arquivo da prova e do gabarito
 	
-	Autor: ;
-*/
-void criarArquivos( struct Questao * questoes, int noQuestoes, int * embaralhamento );
-/* Embaralhar alternativas de uma tal questão 
-	
-	Autor: ;
-*/
-void embaralharAlternativas( struct Questao * questoes );
+	int x,y, tam, *indice;
+	char *novaOrdem[4];
 
+    	indice = criarOrdemAleatoria(4, 0, 4);// quant,min,max
+    
+	for (x=0; x<4;x++){
+		tam = strlen ((*pQuestao).alternativas[indice[x]]);//Lê tamanho da alternativa que vai ser trocada
+		novaOrdem[x] = (char*) malloc (tam*sizeof(char));//cria espaço pra essa alternativa em vetor auxiliar
+		if(novaOrdem[x]==NULL){
+			exit(2);
+		}		
+		strcpy (novaOrdem[x], (*pQuestao).alternativas[indice[x]]);//copia alternativa pra vetor auxiliar
+		
+		novaOrdem[x][0] = 'a' + x;//muda a letra da alternativa
+		//printf ("\n");
+		//puts (novaOrdem[x]);
+		
+		if (indice[x]==0){
+			(*pQuestao).respostaCerta= x;//muda resposta direto no struct
+			
+		}
+	}
+	for (y=0;y<4;y++){
+		strcpy ((*pQuestao).alternativas[y],novaOrdem[y]);//copia alternativa do vetor auxiliar para o oficial
+	}
+}
 
 int main(){
 	struct Questao * questoes;
-	int qtdQuestoes[3]; 
-	
+	int qtdQuestoes, quant_vet[3],x, numItens;
+
 	printf("Informe a quantidade de questões: \n");
 	printf("Nível Fácil: ");
-	scanf("%d", &qtdQuestoes[0]);
+	scanf("%d", &quant_vet[0]);
 	printf("Nível Médio: ");
-	scanf("%d", &qtdQuestoes[1]);	
+	scanf("%d", &quant_vet[1]);
 	printf("Nível Difícil: ");
-	scanf("%d", &qtdQuestoes[2]);
-		
+	scanf("%d", &quant_vet[2]);
+	numItens = quant_vet[0]+quant_vet[1]+quant_vet[2];
+	
+	
 	doArquivo(&questoes, &qtdQuestoes);
+		
+	//embaralharAlternativas(&questoes[i]);
+
 	if( qtdQuestoes != 0)
 	{
 		//...
@@ -195,7 +234,7 @@ int main(){
 	{
 		printf("Erro no arquivo");
 	}
-	freeQuestoes (questoes, str, vetQuestoes);
-	
+
+
 	return 0;
 }
