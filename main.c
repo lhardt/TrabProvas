@@ -98,7 +98,7 @@ void doArquivo(struct Questao ** vetQuestoes, int * qtd){
 			if( (*qtd) >= numQstAlocado -1 ){
 				numQstAlocado += 10;
 				*vetQuestoes = realloc(*vetQuestoes, numQstAlocado * sizeof(struct Questao));
-				if(vetQuestoes == NULL ) {
+				if(*vetQuestoes == NULL ) {
 					printf("Sem memória! Encerrando o programa...\n");
 					exit(-1);
 				}
