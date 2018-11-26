@@ -27,20 +27,6 @@ int fpeek( FILE * stream ) {
     return c;
 }
 
-/* Se o caracter é o cabeçalho de uma alternativa (a, b, c, ou d)
- *
- * Autor: Léo H.;
- */
-int isAlternativa( char diff ){
-	switch( diff ) {
-		case 'a':
-		case 'b':
-		case 'c':
-		case 'd':
-			return 1;
-	}
-	return 0;
-}
 /*
 	A alternativa, no arquivo, é uma letra. Mas conceitualmente é um número.
 	A função é uma conversão entre as duas.
@@ -67,23 +53,22 @@ int charParaAlternativa( char diff )
 	return diff;
 }
 
-/* Lê até que encontre uma nova linha com um dígito (uma nova questão)
- * ou uma letra (uma nova alternativa).
+/* Lê até que encontre uma nova linha cujo 1º caracter é um terminador.
  *
  * Autor: Léo H.
  */
-char * ateNovoToken(FILE * f) {
-	int strSz = 1, strLen = 0, i = 0;
-	char * str = calloc(strSz, sizeof(char));
+char * ateTerminador(FILE * f, char * terminators)  {
+	int strLen = 0; /* Tamanho de str */
+	int i = 0;
+	char * str = calloc(1, sizeof(char));
 	char * linha = calloc( TAM_MAX_LINHA, sizeof(char));
-	str[0] = 0;
-	do {
+	while( !feof(f) && strchr(terminators,fpeek(f)) == NULL ) {
 		fgets(linha, TAM_MAX_LINHA, f);
 		strLen += strlen(linha);
-		str = realloc(str, 1 +strLen);
+		str = realloc(str, 1 + strLen);
 		strcat(str, linha);
-	} while( !feof(f) && !isdigit(fpeek(f)) && !isAlternativa(fpeek(f)) );
-
+	}
+	/* Elimina caracteres redundantes */
 	for(i = strLen - 1; i > 0; i-- ){
 		if(!isprint(str[i]))
 			str[i] = '\0';
@@ -94,50 +79,44 @@ char * ateNovoToken(FILE * f) {
 }
 
 
-/* Ler de um arquivo as questões
+/* Ler de um arquivo as questões.
 
-	Autor: Léo H.
+	Autor: Léo H.;
 */
-void doArquivo(struct Questao ** vetQuestoes, int * qtdQuestoes){
-	FILE * entrada = fopen("entrada.txt", "rt");
-	*qtdQuestoes = 0;
-	if( entrada != NULL ){
-		/* Só para encaixar no scanf. O número da questão aqui é sem propósito. */
-		int dummy = 0;
-		/* Em qual questão o programa opera atualmente */
-		int itQst = 0;
-		/* Quantas questões foram alocadas no vetQuestoes. */
-		int numQstAlocado = 10;
-		/* Porque vetQuestoes não foi inicializado como vetor, o inicializamos. */
-		*vetQuestoes = calloc(numQstAlocado,sizeof(struct Questao));
+void doArquivo(struct Questao ** vetQuestoes, int * qtd){
+	/* Quantas questões foram alocadas no vetQuestoes. */
+	int numQstAlocado = 10;
+	FILE * entrada = fopen("entrada.txt", "r");
+	*qtd = 0;
+	*vetQuestoes = calloc(numQstAlocado,sizeof(struct Questao));;
+	if( entrada == NULL || *vetQuestoes == NULL ){
+		fprintf(stderr, "Sem memória! Encerrando o programa...\n");
+		exit(-1);
+	} else {
 		while( !feof(entrada) ){
 			/* Expandir o vetor se necessário */
-			if( itQst >= numQstAlocado -1 ){
+			if( (*qtd) >= numQstAlocado -1 ){
 				numQstAlocado += 10;
 				*vetQuestoes = realloc(*vetQuestoes, numQstAlocado * sizeof(struct Questao));
-				if( *vetQuestoes == NULL ) {
+				if(vetQuestoes == NULL ) {
 					printf("Sem memória! Encerrando o programa...\n");
 					exit(-1);
 				}
 			}
-			fscanf(entrada, "%d %c", &dummy, &((*vetQuestoes)[itQst]).dificuldade);
+			fscanf(entrada, "%*d %c ", &((*vetQuestoes)[*qtd]).dificuldade);
 			fflush(entrada);
-			(*vetQuestoes)[itQst].enunciado = ateNovoToken(entrada);
-			(*vetQuestoes)[itQst].alternativas[0] = ateNovoToken(entrada);
-			(*vetQuestoes)[itQst].alternativas[1] = ateNovoToken(entrada);
-			(*vetQuestoes)[itQst].alternativas[2] = ateNovoToken(entrada);
-			(*vetQuestoes)[itQst].alternativas[3] = ateNovoToken(entrada);
+			/* Quando tivermos menos alternativas do que esperávamos, resulta strings em branco.
+			 	Porém, se tivessemos menos que duas alternativas, o programa não tem sentido. */
+			(*vetQuestoes)[*qtd].enunciado = ateTerminador(entrada, "a");
+			(*vetQuestoes)[*qtd].alternativas[0] = ateTerminador(entrada, "b");
+			(*vetQuestoes)[*qtd].alternativas[1] = ateTerminador(entrada, "c123456789");
+			(*vetQuestoes)[*qtd].alternativas[2] = ateTerminador(entrada, "d123456789");
+			(*vetQuestoes)[*qtd].alternativas[3] = ateTerminador(entrada, "123456789");
 
-			itQst++;
+			(*qtd)++;
 		}
-		*qtdQuestoes = itQst;
 		fclose(entrada);
-	} else {
-		*vetQuestoes = 0;
 	}
-	
-	printf ("\nNo doArquivo:");
-	puts ((*vetQuestoes)[0].enunciado);
 }
 
 /* A ordem das questões e das alternativas. Use como o índice da lista
