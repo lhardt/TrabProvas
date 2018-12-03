@@ -2,6 +2,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#include <time.h>
+#include <math.h>
+#include <locale.h>
 
 /* Tamanho máximo de uma linha da entrada */
 #define TAM_MAX_LINHA 255
@@ -53,7 +56,8 @@ int charParaAlternativa( char diff )
 	return diff;
 }
 
-/* Lê até que encontre uma nova linha cujo 1º caracter é um terminador.
+/* Lê até que encontre uma nova linha com um dígito (uma nova questão)
+ * ou uma letra (uma nova alternativa).
  *
  * Autor: Léo H.
  */
@@ -78,17 +82,16 @@ char * ateTerminador(FILE * f, char * terminators)  {
 	return str;
 }
 
-
-/* Ler de um arquivo as questões.
+/* Ler de um arquivo as questões
 
 	Autor: Léo H.;
 */
 void doArquivo(struct Questao ** vetQuestoes, int * qtd){
 	/* Quantas questões foram alocadas no vetQuestoes. */
 	int numQstAlocado = 10;
-	FILE * entrada = fopen("entrada.txt", "r");
+	FILE * entrada = fopen("entrada.txt", "rt");
 	*qtd = 0;
-	*vetQuestoes = calloc(numQstAlocado,sizeof(struct Questao));;
+	*vetQuestoes = (struct Questao*) calloc(numQstAlocado,sizeof(struct Questao));;
 	if( entrada == NULL || *vetQuestoes == NULL ){
 		fprintf(stderr, "Sem memória! Encerrando o programa...\n");
 		exit(-1);
@@ -97,10 +100,10 @@ void doArquivo(struct Questao ** vetQuestoes, int * qtd){
 			/* Expandir o vetor se necessário */
 			if( (*qtd) >= numQstAlocado -1 ){
 				numQstAlocado += 10;
-				*vetQuestoes = realloc(*vetQuestoes, numQstAlocado * sizeof(struct Questao));
+				*vetQuestoes = (struct Questao*) realloc(*vetQuestoes, numQstAlocado * sizeof(struct Questao));
 				if(*vetQuestoes == NULL ) {
 					printf("Sem memória! Encerrando o programa...\n");
-					exit(-1);
+					exit(-2);
 				}
 			}
 			fscanf(entrada, "%*d %c ", &((*vetQuestoes)[*qtd]).dificuldade);
@@ -108,6 +111,7 @@ void doArquivo(struct Questao ** vetQuestoes, int * qtd){
 			/* Quando tivermos menos alternativas do que esperávamos, resulta strings em branco.
 			 	Porém, se tivessemos menos que duas alternativas, o programa não tem sentido. */
 			(*vetQuestoes)[*qtd].enunciado = ateTerminador(entrada, "a");
+				
 			(*vetQuestoes)[*qtd].alternativas[0] = ateTerminador(entrada, "b");
 			(*vetQuestoes)[*qtd].alternativas[1] = ateTerminador(entrada, "c123456789");
 			(*vetQuestoes)[*qtd].alternativas[2] = ateTerminador(entrada, "d123456789");
@@ -118,7 +122,6 @@ void doArquivo(struct Questao ** vetQuestoes, int * qtd){
 		fclose(entrada);
 	}
 }
-
 /* A ordem das questões e das alternativas. Use como o índice da lista
 
 	Autor: Ana;
@@ -127,36 +130,93 @@ int *criarOrdemAleatoria(int numItens, int numMin, int numMax)
 {
 	srand((unsigned)time(NULL));
 	
-    int y,x,*usado,*novo_indice;
+	int y,x,*usado,*novo_indice;
 
-    usado = calloc(numItens, sizeof(int));
-    novo_indice = malloc(numItens*sizeof(int));
-
-	for (x=0;x<numItens;x++)//enquanto x< que a quant de nueros pedidos
+	usado = (int*)calloc(numItens, sizeof(int));
+	novo_indice = (int*)malloc(numItens*sizeof(int));
+	if( novo_indice == NULL ){
+		exit(4);
+	}
+    
+	for (x=0;x<numItens;x++)
 	{
-		novo_indice[x] = numMin+ (rand() % numMax-numMin);//sorteia numero entre o minimo e maximo
+		novo_indice[x] = numMin+ (rand() % abs(numMax-numMin));
 	    do
 	    {
 	        usado[x]=0;
 	        for (y=0;y<x;y++)
 	        {
-	        	if (novo_indice[x]==novo_indice[y]){//se já tiver numero igual no vetor
-	        		usado[x] = 1;//significa tem igual, pra usar no do-while
-	        		novo_indice[x] = numMin+ (rand() % numMax-numMin);//sorteia de novo
-					//break;???
+	        	if (novo_indice[x]==novo_indice[y]){
+	        		usado[x] = 1;
+	        		novo_indice[x] = numMin+ (rand() % abs(numMax-numMin));
+				//break;
 				}
 			}
             
 	    }while(usado[x]==1);
 	}
 	
-    return  novo_indice;//retorna o novo indice embaralhado
+    return  novo_indice;
 
 }
-/* Embaralha os structs com alternativas (1 por vez)
+/* Coloca uma lista de questões no arquivo da prova e do gabarito
 
-	Autor: Ana;
+	Autor: ;
 */
+void embaralharPerguntas (int quant_vet[],struct Questao questoes[], int numItens)
+{
+	int *indMedio, *indDificil, *indice,x,y,tam;
+	char *novaOrdem[numItens];
+	
+	indice = criarOrdemAleatoria (quant_vet[0],0,40);//40 ou 39?
+	indMedio = criarOrdemAleatoria (quant_vet[1],40,80);//80 ou 79?
+	indDificil = criarOrdemAleatoria (quant_vet[2],80,120);//120 ou 119?
+  	
+	printf ("\n\nEMBARALHARPERGUNTAS");
+	
+	indice = (int*) realloc (indice, numItens*sizeof(int));
+	
+	for (x=0;x<quant_vet[1];x++){
+		indice [quant_vet[0]+x] = indMedio [x];
+	}
+	for (x=0;x<quant_vet[2];x++){
+		indice [quant_vet[1]+quant_vet[2]+x] = indDificil [x];
+	}
+	
+	printf ("\nINDICE: ");
+	for (x=0;x<numItens;x++){
+		printf ("%d ", indice [x]);
+	}
+	
+	for (x=0; x<numItens;x++){
+		
+		tam = strlen (questoes[indice[x]].enunciado);
+    		printf ("\nTam: %d \n", tam);
+		novaOrdem[x] = (char*) malloc (tam*sizeof(char));
+		if(novaOrdem[x]==NULL){
+			exit(2);
+		}
+		
+    		printf ("oi\n");
+		strcpy (novaOrdem[x], questoes[indice[x]].enunciado);
+		
+		puts (novaOrdem[x]);
+		
+   		 printf ("\n");
+	}
+	
+	for (y=0;y<numItens;y++){
+		tam = strlen (novaOrdem[y]);
+		
+		free (questoes[y].enunciado);
+		questoes[y].enunciado = (char*) malloc (tam*sizeof(char));
+		
+		strcpy (questoes[y].enunciado,novaOrdem[y]);
+		
+	}
+	
+}
+
 void embaralharAlternativas(struct Questao *pQuestao)
 {
 	
@@ -166,30 +226,37 @@ void embaralharAlternativas(struct Questao *pQuestao)
     	indice = criarOrdemAleatoria(4, 0, 4);// quant,min,max
     
 	for (x=0; x<4;x++){
-		tam = strlen ((*pQuestao).alternativas[indice[x]]);//Lê tamanho da alternativa que vai ser trocada
-		novaOrdem[x] = (char*) malloc (tam*sizeof(char));//cria espaço pra essa alternativa em vetor auxiliar
+		tam = strlen ((*pQuestao).alternativas[indice[x]]);
+		novaOrdem[x] = (char*) malloc (tam*sizeof(char));
 		if(novaOrdem[x]==NULL){
 			exit(2);
-		}		
-		strcpy (novaOrdem[x], (*pQuestao).alternativas[indice[x]]);//copia alternativa pra vetor auxiliar
+		}
 		
-		novaOrdem[x][0] = 'a' + x;//muda a letra da alternativa
-		//printf ("\n");
-		//puts (novaOrdem[x]);
+		strcpy (novaOrdem[x], (*pQuestao).alternativas[x]);
+		
+		novaOrdem[x][0] = 'a' + x;
 		
 		if (indice[x]==0){
-			(*pQuestao).respostaCerta= x;//muda resposta direto no struct
-			
+			(*pQuestao).respostaCerta= x;
 		}
 	}
 	for (y=0;y<4;y++){
-		strcpy ((*pQuestao).alternativas[y],novaOrdem[y]);//copia alternativa do vetor auxiliar para o oficial
+		tam = strlen (novaOrdem[y]);
+		
+		free ((*pQuestao).alternativas[y]);
+		(*pQuestao).alternativas[y] = (char*) malloc (tam*sizeof(char));
+		
+		strcpy ((*pQuestao).alternativas[y],novaOrdem[y]);
 	}
+
 }
 
+
 int main(){
+  setlocale(LC_ALL, "Portuguese");
+
 	struct Questao * questoes;
-	int qtdQuestoes, quant_vet[3],x, numItens;
+	int qtdQuestoes, quant_vet[3],x, numItens,i;
 
 	printf("Informe a quantidade de questões: \n");
 	printf("Nível Fácil: ");
@@ -202,9 +269,18 @@ int main(){
 	
 	
 	doArquivo(&questoes, &qtdQuestoes);
-		
-	//embaralharAlternativas(&questoes[i]);
+	
+	
+	
+	embaralharPerguntas (quant_vet,questoes,numItens);
+	
+	//embaralharAlternativas(&questoes[1]);
 
+	/*for(i = 0; i < qtdQuestoes; i++ ){
+			printf("q%d: %s\n\nR. Certa: %d\n\n[%s]\n\n[%s]\n\n[%s]\n\n[%s]\n\n\n", i+1, questoes[i].enunciado, questoes[i].respostaCerta,questoes[i].alternativas[0], questoes[i].alternativas[1], questoes[i].alternativas[2], questoes[i].alternativas[3]);
+    
+		}fprintf(stderr, "quantidade: %d\n", qtdQuestoes);
+  */
 	if( qtdQuestoes != 0)
 	{
 		//...
@@ -213,7 +289,8 @@ int main(){
 	{
 		printf("Erro no arquivo");
 	}
-
+  
+		
 
 	return 0;
 }
