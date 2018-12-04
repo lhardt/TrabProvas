@@ -55,6 +55,28 @@ int charParaAlternativa( char diff )
 	}
 	return diff;
 }
+/* Inverso da função de cima. Utilizada na hora da impressão dos arquivos.
+Autor: Luísa*/
+char altParaChar( int diff )
+{
+	switch(diff)
+	{
+		case 0:
+			diff = 'a';
+			break;
+		case 1:
+			diff = 'b';
+			break;
+		case 2:
+			diff = 'c';
+			break;
+		case 3:
+			diff = 'd';
+			break;
+	}
+	return diff;
+}
+
 
 /* Lê até que encontre uma nova linha com um dígito (uma nova questão)
  * ou uma letra (uma nova alternativa).
@@ -122,6 +144,7 @@ void doArquivo(struct Questao ** vetQuestoes, int * qtd){
 		fclose(entrada);
 	}
 }
+
 /* A ordem das questões e das alternativas. Use como o índice da lista
 
 	Autor: Ana;
@@ -151,14 +174,12 @@ int *criarOrdemAleatoria(int numItens, int numMin, int numMax)
 	        		novo_indice[x] = numMin+ (rand() % abs(numMax-numMin));
 				//break;
 				}
-			}
-            
+			}            
 	    }while(usado[x]==1);
-	}
-	
+	}	
     return  novo_indice;
-
 }
+
 /* Coloca uma lista de questões no arquivo da prova e do gabarito
 
 	Autor: ;
@@ -188,23 +209,19 @@ void embaralharPerguntas (int quant_vet[],struct Questao questoes[], int numIten
 		printf ("%d ", indice [x]);
 	}
 	
-	for (x=0; x<numItens;x++){
-		
+	for (x=0; x<numItens;x++){		
 		tam = strlen (questoes[indice[x]].enunciado);
     		printf ("\nTam: %d \n", tam);
 		novaOrdem[x] = (char*) malloc (tam*sizeof(char));
+		
 		if(novaOrdem[x]==NULL){
 			exit(2);
-		}
-		
+		}		
     		printf ("oi\n");
-		strcpy (novaOrdem[x], questoes[indice[x]].enunciado);
-		
-		puts (novaOrdem[x]);
-		
-   		 printf ("\n");
-	}
-	
+		strcpy (novaOrdem[x], questoes[indice[x]].enunciado);		
+		puts (novaOrdem[x]);		
+   		printf ("\n");
+	}	
 	for (y=0;y<numItens;y++){
 		tam = strlen (novaOrdem[y]);
 		
@@ -212,14 +229,11 @@ void embaralharPerguntas (int quant_vet[],struct Questao questoes[], int numIten
 		questoes[y].enunciado = (char*) malloc (tam*sizeof(char));
 		
 		strcpy (questoes[y].enunciado,novaOrdem[y]);
-		
-	}
-	
+	}	
 }
 
 void embaralharAlternativas(struct Questao *pQuestao)
 {
-	
 	int x,y, tam, *indice;
 	char *novaOrdem[4];
 
@@ -230,10 +244,8 @@ void embaralharAlternativas(struct Questao *pQuestao)
 		novaOrdem[x] = (char*) malloc (tam*sizeof(char));
 		if(novaOrdem[x]==NULL){
 			exit(2);
-		}
-		
-		strcpy (novaOrdem[x], (*pQuestao).alternativas[x]);
-		
+		}		
+		strcpy (novaOrdem[x], (*pQuestao).alternativas[x]);		
 		novaOrdem[x][0] = 'a' + x;
 		
 		if (indice[x]==0){
@@ -248,9 +260,32 @@ void embaralharAlternativas(struct Questao *pQuestao)
 		
 		strcpy ((*pQuestao).alternativas[y],novaOrdem[y]);
 	}
-
 }
 
+/*Impressão dos arquivos.
+Autor: Luísa */
+void imprimir (int quant_vet [], struct Questao questoes [])
+{
+		FILE *arquivo_final, *gabarito;
+		int i=0, x, contador=0, numero_questao_gab =0;
+		char alt, letra;
+
+		arquivo_final = fopen ("Prova.txt", "wt");
+		gabarito = fopen ("Gabarito.txt", "wt");
+
+    fprintf(gabarito, "GABARITO\n\n"); //impressão do gabarito no arquivo
+
+  for(x=0; x<3; x++) //de 0 a 2, pelo nível de dificuldade
+  {
+    i=0;
+      do{
+        alt = altParaChar(questoes[i].respostaCerta);
+        fprintf(gabarito, "%d - %c\n", numero_questao_gab+1, alt);
+        i++;
+        numero_questao_gab++;
+      } while (i < quant_vet [x]); //percorre a quantidade de perguntas do nível de dificuldade estabelecido conforme indicada no início
+  }
+}
 
 int main(){
   setlocale(LC_ALL, "Portuguese");
@@ -266,12 +301,8 @@ int main(){
 	printf("Nível Difícil: ");
 	scanf("%d", &quant_vet[2]);
 	numItens = quant_vet[0]+quant_vet[1]+quant_vet[2];
-	
-	
-	doArquivo(&questoes, &qtdQuestoes);
-	
-	
-	
+		
+	doArquivo(&questoes, &qtdQuestoes);	
 	embaralharPerguntas (quant_vet,questoes,numItens);
 	
 	//embaralharAlternativas(&questoes[1]);
@@ -283,14 +314,11 @@ int main(){
   */
 	if( qtdQuestoes != 0)
 	{
-		//...
+		imprimir(quant_vet, questoes);
 	}
 	else
 	{
 		printf("Erro no arquivo");
 	}
-  
-		
-
 	return 0;
 }
