@@ -120,6 +120,8 @@ char * removerCabecalho(char * str){
 /* Ler de um arquivo as questões
 	Autor: Léo H.;
 */
+/* Ler de um arquivo as questões
+	Autor: Léo H.;*/
 void doArquivo(struct Questao ** vetQuestoes, int * qtd){
 	/* Quantas questões foram alocadas no vetQuestoes. */
 	int numQstAlocado = 10;
@@ -141,15 +143,14 @@ void doArquivo(struct Questao ** vetQuestoes, int * qtd){
 				}
 			}
 			fscanf(entrada, "%d %c ", &dummy, &((*vetQuestoes)[*qtd]).dificuldade);
-			
 			/* Quando tivermos menos alternativas do que esperávamos, resulta strings em branco.
 			 	Porém, se tivessemos menos que duas alternativas, o programa não tem sentido. */
 			(*vetQuestoes)[*qtd].enunciado = ateTerminador(entrada, "a");
 
-			(*vetQuestoes)[*qtd].alternativas[0] = ateTerminador(entrada, "b");
-			(*vetQuestoes)[*qtd].alternativas[1] = ateTerminador(entrada, "c123456789");
-			(*vetQuestoes)[*qtd].alternativas[2] = ateTerminador(entrada, "d123456789");
-			(*vetQuestoes)[*qtd].alternativas[3] = ateTerminador(entrada, "123456789");
+			(*vetQuestoes)[*qtd].alternativas[0] = removerCabecalho(ateTerminador(entrada, "b"));
+			(*vetQuestoes)[*qtd].alternativas[1] = removerCabecalho(ateTerminador(entrada, "c123456789"));
+			(*vetQuestoes)[*qtd].alternativas[2] = removerCabecalho(ateTerminador(entrada, "d123456789"));
+			(*vetQuestoes)[*qtd].alternativas[3] = removerCabecalho(ateTerminador(entrada, "123456789"));
 
 			(*qtd)++;
 		}
