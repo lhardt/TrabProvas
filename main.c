@@ -77,14 +77,14 @@ char * ateTerminador(FILE * f, char * terminators)  {
 	return str;
 }
 
-/* A alternativa sempre começa com 'a ', 'b ', etc. Limpa a antiga string.
+/* A alternativa sempre começa com 'a ', 'b ', etc.
  * Autor: Léo H.;*/
 char * removerCabecalho(char * str){
-	char * str2 = calloc(strlen(str), sizeof(char));
-	char dummy;
-	sscanf(str, "%c %[^\0]", &dummy, str2);
-	free(str);
-	return str2;
+	int i = 0, len = strlen(str);
+	for( i = 2; i <= len; i++){
+		str[i-2] = str[i]; 
+	}
+	return str;
 }
 
 /* Ler de um arquivo as questões
@@ -192,12 +192,21 @@ void embaralhar (int quant_vet[],struct Questao questoes[], int numItens)
 	indDificil = criarOrdemAleatoria (quant_vet[2],80,120);
 	
 	//Junta todos os indices em um só, no indice de perguntas faceis
+	for (x=0;x<quant_vet[2];x++)
+	{
+		printf ("%d ", indDificil[x]);
+	}
 	indice = (int*) realloc (indice, numItens*sizeof(int));
 	for (x=0;x<quant_vet[1];x++){
 		indice [quant_vet[0]+x] = indMedio [x];
 	}
 	for (x=0;x<quant_vet[2];x++){
-		indice [quant_vet[1]+quant_vet[2]+x] = indDificil [x];
+		indice [quant_vet[0]+quant_vet[1]+x] = indDificil [x];
+	}
+	printf ("\n\nIndidce completo: ");
+	for (x=0;x<numItens;x++)
+	{
+		printf ("%d ", indice[x]);
 	}
 	//Copia enunciado e alternativa para variável auxiliar
 	for (x=0; x<numItens;x++){
@@ -237,22 +246,36 @@ void embaralhar (int quant_vet[],struct Questao questoes[], int numItens)
  * Autor: Luísa; */
 void imprimir (int quant_vet [], struct Questao questoes []){
 	FILE *arquivo_final, *gabarito;
-	int i=0, x, contador=0, numero_questao_gab =0, num=0, valor=0;
+	int i=0, x, contador=0, num=0, valor=0;
 	char alt, letras;
+	int quantVetTotal = 0;
 
 	arquivo_final = fopen ("Prova.txt", "wt");
 	gabarito = fopen ("Gabarito.txt", "wt");
 	
 	fprintf(gabarito, "GABARITO\n\n");
-	for(x=0; x<3; x++){ //de 0 a 2, pelo nível de dificuldade
-		i=0;
-		do{
+	
+	fprintf(arquivo_final, "PROVA\n\nNome: ____________________________\tTurma: ___________\tData: ____/____/_______\n");
+	//de 0 a 2, pelo nível de dificuldade
+	
+	for(x=0; x<3; x++){ 
+		printf("A %d CORNO\n", x ); 
+		quantVetTotal += quant_vet[x];
+		//percorre a quantidade de perguntas do nível de dificuldade estabelecido conforme indicada no início
+		while (i < quantVetTotal){
+			// ARQUIVO PROVA
+			fprintf(arquivo_final, "\n%d. %s\n", 1+i, questoes[i].enunciado);
+			for(num =0 ; num <4 ; num++){
+				letras = altParaChar(num);
+				fprintf(arquivo_final, "%c) %s\n", letras, questoes[i].alternativas[num]);
+			}
+			// ARQUIVO GABARITO!			
 			alt = altParaChar(questoes[i].respostaCerta);
 			switch(x)
 			{
 				case 0:
-			    		letras = 'F';
-			    		break;
+			    	letras = 'F';
+			    	break;
 			 	case 1:
 			   		letras = 'M';
 			    		break;
@@ -260,24 +283,9 @@ void imprimir (int quant_vet [], struct Questao questoes []){
 					letras =  'D';
 					break;
 			}
-			fprintf(gabarito, "%d (%c) - %c\n", numero_questao_gab+1, letras, alt); //impressão do gabarito no arquivo
+			fprintf(gabarito, "%d (%c) - %c\n", i+1, letras, alt); //impressão do gabarito no arquivo
 			i++;
-			numero_questao_gab++;
-     		} while (i < quant_vet [x]); //percorre a quantidade de perguntas do nível de dificuldade estabelecido conforme indicada no início
-	}
-	
-	fprintf(arquivo_final, "PROVA\n\nNome: ____________________________\tTurma: ___________\tData: ____/____/_______\n");
-	for(x=0; x<3; x++){ //de 0 a 2, pelo nível de dificuldade
-		i=0;
-		do{
-			valor++;
-			fprintf(arquivo_final, "\n%d. %s\n", valor, questoes[i].enunciado);
-			for(num =0 ; num <4 ; num++){
-				letras = altParaChar(num);
-				fprintf(arquivo_final, "%c) %s\n", letras, questoes[i].alternativas[num]);
-			}
-			i++;
-		} while (i < quant_vet [x]); //percorre a quantidade de perguntas do nível de dificuldade estabelecido conforme indicada no início
+		} 
 	}
 }
 
@@ -315,6 +323,9 @@ int main(){
 		
 	doArquivo(&questoes, &qtdQuestoes);	
 	embaralhar (quant_vet,questoes,numItens);
+	
+		printf("DIFF DECIMA %c\n", questoes[10].dificuldade);
+
 	
 	if( qtdQuestoes != 0){
 		imprimir(quant_vet, questoes);
