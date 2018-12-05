@@ -31,32 +31,10 @@ int fpeek( FILE * stream ) {
     return c;
 }
 
-/*
-	A alternativa, no arquivo, é uma letra. Mas conceitualmente é um número.
+/* A alternativa, no arquivo, é uma letra. Mas conceitualmente é um número.
 	A função é uma conversão entre as duas.
 	Ex de conversão: a=0, b=1, c=2, d=3
-	Autor: Luísa;
-*/
-int charParaAlternativa( char diff )
-{
-	switch(diff)
-	{
-		case 'a':
-			diff = 0;
-			break;
-		case 'b':
-			diff = 1;
-			break;
-		case 'c':
-			diff = 2;
-			break;
-		case 'd':
-			diff = 3;
-			break;
-	}
-	return diff;
-}
-/* Inverso da função de cima. Utilizada na hora da impressão dos arquivos.
+	Utilizada na hora da impressão dos arquivos.
 Autor: Luísa*/
 char altParaChar( int diff )
 {
