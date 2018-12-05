@@ -107,7 +107,7 @@ void doArquivo(struct Questao ** vetQuestoes, int * qtd){
 	*qtd = 0; int dummy = 0;
 	*vetQuestoes = (struct Questao*) calloc(numQstAlocado,sizeof(struct Questao));;
 	if( entrada == NULL || *vetQuestoes == NULL ){
-		fprintf(stderr, "Sem memória! Encerrando o programa...\n");
+		printf("Sem memória! Encerrando o programa...\n");
 		exit(-1);
 	} else {
 		while( !feof(entrada) ){
@@ -269,7 +269,8 @@ void imprimir (int quant_vet [], struct Questao questoes [])
   for(x=0; x<3; x++) //de 0 a 2, pelo nível de dificuldade
   {
     i=0;
-      do{
+      do
+      {
         alt = altParaChar(questoes[i].respostaCerta);
         switch(x)
         {
@@ -287,8 +288,41 @@ void imprimir (int quant_vet [], struct Questao questoes [])
         i++;
         numero_questao_gab++;
       } while (i < quant_vet [x]); //percorre a quantidade de perguntas do nível de dificuldade estabelecido conforme indicada no início
-  }
+    }
 
+  fprintf(arquivo_final, "PROVA\n\nNome: ____________________________\tTurma: ___________\tData: ____/____/_______\n");
+  for(x=0; x<3; x++) //de 0 a 2, pelo nível de dificuldade
+  {
+    i=0;    
+    do{
+      valor++;
+    fprintf(arquivo_final, "\n%d. %s\n", valor, questoes[i].enunciado);
+      
+        for(num =0 ; num <4 ; num++)
+        {
+          letras = altParaChar(num);   
+          fprintf(arquivo_final, "%c) %s\n", letras, questoes[i].alternativas[num]);
+        }
+        i++;     
+      } while (i < quant_vet [x]); //percorre a quantidade de perguntas do nível de dificuldade estabelecido conforme indicada no início
+  }
+}
+
+//Free para todos vetores alocados dinamicamente
+//Autor: Luísa
+void liberar(struct Questao *questoes, int qtdQuestoes)
+{
+   int i=0, x=0;
+   for(; x<qtdQuestoes; x++)
+   {
+    free(questoes[x].enunciado);
+      for (; i<4; i++)
+      {
+        free(questoes[x].alternativas[i]);
+      }
+   }
+   free(questoes);    
+}
 
 int main(){
   setlocale(LC_ALL, "Portuguese");
@@ -310,7 +344,8 @@ int main(){
 	
 	if( qtdQuestoes != 0)
 	{
-		imprimir(quant_vet, questoes,numItens);
+		imprimir(quant_vet, questoes);
+    liberar(questoes, qtdQuestoes);
 	}
 	else
 	{
