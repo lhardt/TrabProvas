@@ -104,6 +104,18 @@ char * ateTerminador(FILE * f, char * terminators)  {
 	return str;
 }
 
+/* A alternativa sempre começa com 'a ', 'b ', etc. Limpa a antiga string.
+ *
+ * Autor: Léo H.
+ */
+char * removerCabecalho(char * str){
+	char * str2 = calloc(strlen(str), sizeof(char));
+	char dummy;
+	sscanf(str, "%c %s", &dummy, str2);
+	free(str);
+	return str2;
+}
+
 /* Ler de um arquivo as questões
 
 	Autor: Léo H.;
@@ -134,11 +146,10 @@ void doArquivo(struct Questao ** vetQuestoes, int * qtd){
 			 	Porém, se tivessemos menos que duas alternativas, o programa não tem sentido. */
 			(*vetQuestoes)[*qtd].enunciado = ateTerminador(entrada, "a");
 				
-			(*vetQuestoes)[*qtd].alternativas[0] = ateTerminador(entrada, "b");
-			(*vetQuestoes)[*qtd].alternativas[1] = ateTerminador(entrada, "c123456789");
-			(*vetQuestoes)[*qtd].alternativas[2] = ateTerminador(entrada, "d123456789");
-			(*vetQuestoes)[*qtd].alternativas[3] = ateTerminador(entrada, "123456789");
-
+			(*vetQuestoes)[*qtd].alternativas[0] = removerCabecalho(ateTerminador(entrada, "b"));
+			(*vetQuestoes)[*qtd].alternativas[1] = removerCabecalho(ateTerminador(entrada, "c123456789"));
+			(*vetQuestoes)[*qtd].alternativas[2] = removerCabecalho(ateTerminador(entrada, "d123456789"));
+			(*vetQuestoes)[*qtd].alternativas[3] = removerCabecalho(ateTerminador(entrada, "123456789"));
 			(*qtd)++;
 		}
 		fclose(entrada);
