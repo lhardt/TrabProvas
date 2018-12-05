@@ -82,7 +82,7 @@ char * ateTerminador(FILE * f, char * terminators)  {
 char * removerCabecalho(char * str){
 	char * str2 = calloc(strlen(str), sizeof(char));
 	char dummy;
-	sscanf(str, "%c %s", &dummy, str2);
+	sscanf(str, "%c %[^\0]", &dummy, str2);
 	free(str);
 	return str2;
 }
