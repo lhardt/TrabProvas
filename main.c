@@ -10,20 +10,19 @@
 #define TAM_MAX_LINHA 255
 
 struct Questao {
-	/* Título da questão */
+	/* Título da questão; */
 	char * enunciado;
-	/* O índice da resposta certa */
+	/* O índice da resposta certa; */
 	int respostaCerta;
-	/* as quatro alternativas da questão */
+	/* as quatro alternativas da questão; */
 	char * alternativas[4];
+	/* dificuldade (F, M ou D); */
 	char dificuldade;
 };
 
 /* Função auxiliar, como a fpeek do C++.
  * 'Espia' como será o próximo caracter de um arquivo.
- * Autor: Léo H.;
- */
-
+ * Autor: Léo H.; */
 int fpeek( FILE * stream ) {
     int c;
     c = fgetc(stream);
@@ -32,14 +31,12 @@ int fpeek( FILE * stream ) {
 }
 
 /* A alternativa, no arquivo, é uma letra. Mas conceitualmente é um número.
-	A função é uma conversão entre as duas.
-	Ex de conversão: a=0, b=1, c=2, d=3
-	Utilizada na hora da impressão dos arquivos.
-Autor: Luísa*/
-char altParaChar( int diff )
-{
-	switch(diff)
-	{
+ * A função é uma conversão entre as duas.
+ * Ex de conversão: a=0, b=1, c=2, d=3.
+ * Utilizada na hora da impressão dos arquivos.
+ * Autor: Luísa; */
+char altParaChar( int diff ){
+	switch(diff){
 		case 0:
 			diff = 'a';
 			break;
@@ -56,12 +53,9 @@ char altParaChar( int diff )
 	return diff;
 }
 
-
 /* Lê até que encontre uma nova linha com um dígito (uma nova questão)
  * ou uma letra (uma nova alternativa).
- *
- * Autor: Léo H.
- */
+ * Autor: Léo H.; */
 char * ateTerminador(FILE * f, char * terminators)  {
 	int strLen = 0; /* Tamanho de str */
 	int i = 0;
@@ -75,18 +69,16 @@ char * ateTerminador(FILE * f, char * terminators)  {
 	}
 	/* Elimina caracteres redundantes */
 	for(i = strLen - 1; i > 0; i-- ){
-		if(!isprint(str[i]))
+		if(!isprint(str[i])){
 			str[i] = '\0';
-		else break;
+		}else break;
 	}
 	free(linha);
 	return str;
 }
 
 /* A alternativa sempre começa com 'a ', 'b ', etc. Limpa a antiga string.
- *
- * Autor: Léo H.
- */
+ * Autor: Léo H.;*/
 char * removerCabecalho(char * str){
 	char * str2 = calloc(strlen(str), sizeof(char));
 	char dummy;
@@ -96,10 +88,7 @@ char * removerCabecalho(char * str){
 }
 
 /* Ler de um arquivo as questões
-	Autor: Léo H.;
-*/
-/* Ler de um arquivo as questões
-	Autor: Léo H.;*/
+ * Autor: Léo H.;*/
 void doArquivo(struct Questao ** vetQuestoes, int * qtd){
 	/* Quantas questões foram alocadas no vetQuestoes. */
 	int numQstAlocado = 10;
@@ -109,38 +98,35 @@ void doArquivo(struct Questao ** vetQuestoes, int * qtd){
 	if( entrada == NULL || *vetQuestoes == NULL ){
 		printf("Sem memória! Encerrando o programa...\n");
 		exit(-1);
-	} else {
-		while( !feof(entrada) ){
-			/* Expandir o vetor se necessário */
-			if( (*qtd) >= numQstAlocado -1 ){
-				numQstAlocado += 10;
-				*vetQuestoes = (struct Questao*) realloc(*vetQuestoes, numQstAlocado * sizeof(struct Questao));
-				if(*vetQuestoes == NULL ) {
-					printf("Sem memória! Encerrando o programa...\n");
-					exit(-2);
-				}
-			}
-			fscanf(entrada, "%d %c ", &dummy, &((*vetQuestoes)[*qtd]).dificuldade);
-			/* Quando tivermos menos alternativas do que esperávamos, resulta strings em branco.
-			 	Porém, se tivessemos menos que duas alternativas, o programa não tem sentido. */
-			(*vetQuestoes)[*qtd].enunciado = ateTerminador(entrada, "a");
-
-			(*vetQuestoes)[*qtd].alternativas[0] = removerCabecalho(ateTerminador(entrada, "b"));
-			(*vetQuestoes)[*qtd].alternativas[1] = removerCabecalho(ateTerminador(entrada, "c123456789"));
-			(*vetQuestoes)[*qtd].alternativas[2] = removerCabecalho(ateTerminador(entrada, "d123456789"));
-			(*vetQuestoes)[*qtd].alternativas[3] = removerCabecalho(ateTerminador(entrada, "123456789"));
-
-			(*qtd)++;
-		}
-		fclose(entrada);
 	}
+	while( !feof(entrada) ){
+		/* Expandir o vetor se necessário */
+		if( (*qtd) >= numQstAlocado -1 ){
+			numQstAlocado += 10;
+			*vetQuestoes = (struct Questao*) realloc(*vetQuestoes, numQstAlocado * sizeof(struct Questao));
+			if(*vetQuestoes == NULL ) {
+				printf("Sem memória! Encerrando o programa...\n");
+				exit(-2);
+			}
+		}
+		fscanf(entrada, "%d %c ", &dummy, &((*vetQuestoes)[*qtd]).dificuldade);
+		/* Quando tivermos menos alternativas do que esperávamos, resulta strings em branco.
+			Porém, se tivessemos menos que duas alternativas, o programa não tem sentido. */
+		(*vetQuestoes)[*qtd].enunciado = ateTerminador(entrada, "a");
+
+		(*vetQuestoes)[*qtd].alternativas[0] = removerCabecalho(ateTerminador(entrada, "b"));
+		(*vetQuestoes)[*qtd].alternativas[1] = removerCabecalho(ateTerminador(entrada, "c123456789"));
+		(*vetQuestoes)[*qtd].alternativas[2] = removerCabecalho(ateTerminador(entrada, "d123456789"));
+		(*vetQuestoes)[*qtd].alternativas[3] = removerCabecalho(ateTerminador(entrada, "123456789"));
+
+		(*qtd)++;
+	}
+	fclose(entrada);
 }
 
 /* A ordem das questões e das alternativas. Use como o índice da lista
-	Autor: Ana;
-*/
-int *criarOrdemAleatoria(int numItens, int numMin, int numMax)
-{
+ * Autor: Ana; */
+int *criarOrdemAleatoria(int numItens, int numMin, int numMax){
 	srand((unsigned)time(NULL));
 	
 	int y,x,*usado,*novo_indice;
@@ -158,22 +144,19 @@ int *criarOrdemAleatoria(int numItens, int numMin, int numMax)
 	        	if (novo_indice[x]==novo_indice[y]){//se o valor do recem sorteado for igual a outro sorteado anteriormente, continua sorteando até que aconteca o contrario
 	        		usado[x] = 1;
 	        		novo_indice[x] = numMin+ (rand() % abs(numMax-numMin));
-				}
-			}            
+			}
+		}            
 	    }while(usado[x]==1);
 	}	
     return  novo_indice;
 }
 
 /* Embaralha alternativas de determinada questão de acordo com o índice de *criarOrdemAleatoria()
-	Autor: Ana;
-*/
-void embaralharAlternativas(struct Questao *pQuestao)
-{
+ * Autor: Ana; */
+void embaralharAlternativas(struct Questao *pQuestao){
 	int x,y, tam, *indice;
 	char *novaOrdem[4];
-
-    indice = criarOrdemAleatoria(4, 0, 4);// quantidade,valor min, valor max
+	indice = criarOrdemAleatoria(4, 0, 4);// quantidade,valor min, valor max
     
 	for (x=0; x<4;x++){//copia altermativas para vetor auxiliar
 		tam = strlen ((*pQuestao).alternativas[indice[x]]);
@@ -182,8 +165,7 @@ void embaralharAlternativas(struct Questao *pQuestao)
 			exit(2);
 		}		
 		strcpy (novaOrdem[x], (*pQuestao).alternativas[indice[x]]);		
-		novaOrdem[x][0] = 'a' + x;
-		
+				
 		if (indice[x]==0){//muda a alternativa que contem a resposta
 			(*pQuestao).respostaCerta= x;
 		}
@@ -199,17 +181,16 @@ void embaralharAlternativas(struct Questao *pQuestao)
 }
 
 /* Embaralha as questões de acordo com o índice de *criarOrdemAleatoria()
-	Autor: Ana;
-*/
+ * Autor: Ana; */
 void embaralhar (int quant_vet[],struct Questao questoes[], int numItens)
 {
 	int *indMedio, *indDificil, *indice,x,y,tam, tamAlt;
 	char *novaOrdem[numItens], *novaAlternativa[numItens][4];
 	
 	// Chama a funcao para criar um indice para cada uma das especificações de quantidade e nivel
-	indice = criarOrdemAleatoria (quant_vet[0],0,40);//40 ou 39?
-	indMedio = criarOrdemAleatoria (quant_vet[1],40,80);//80 ou 79?
-	indDificil = criarOrdemAleatoria (quant_vet[2],80,120);//120 ou 119?
+	indice = criarOrdemAleatoria (quant_vet[0],0,40);
+	indMedio = criarOrdemAleatoria (quant_vet[1],40,80);
+	indDificil = criarOrdemAleatoria (quant_vet[2],80,120);
 	
 	//Junta todos os indices em um só, no indice de perguntas faceis
 	indice = (int*) realloc (indice, numItens*sizeof(int));
@@ -253,80 +234,71 @@ void embaralhar (int quant_vet[],struct Questao questoes[], int numItens)
 	}
 }
 
-/*Impressão dos arquivos.
-Autor: Luísa */
-void imprimir (int quant_vet [], struct Questao questoes [])
-{
-		FILE *arquivo_final, *gabarito;
-		int i=0, x, contador=0, numero_questao_gab =0, num=0, valor=0;
-		char alt, letras;
+/* Impressão dos arquivos.
+ * Autor: Luísa; */
+void imprimir (int quant_vet [], struct Questao questoes []){
+	FILE *arquivo_final, *gabarito;
+	int i=0, x, contador=0, numero_questao_gab =0, num=0, valor=0;
+	char alt, letras;
 
-		arquivo_final = fopen ("Prova.txt", "wt");
-		gabarito = fopen ("Gabarito.txt", "wt");
-
-    fprintf(gabarito, "GABARITO\n\n"); 
-
-  for(x=0; x<3; x++) //de 0 a 2, pelo nível de dificuldade
-  {
-    i=0;
-      do
-      {
-        alt = altParaChar(questoes[i].respostaCerta);
-        switch(x)
-        {
-          case 0:
-            letras = 'F';
-            break;
-          case 1:
-            letras = 'M';
-            break;
-          case 2:
-            letras =  'D';
-            break;
-        }
-        fprintf(gabarito, "%d (%c) - %c\n", numero_questao_gab+1, letras, alt); //impressão do gabarito no arquivo
-        i++;
-        numero_questao_gab++;
-      } while (i < quant_vet [x]); //percorre a quantidade de perguntas do nível de dificuldade estabelecido conforme indicada no início
-    }
-
-  fprintf(arquivo_final, "PROVA\n\nNome: ____________________________\tTurma: ___________\tData: ____/____/_______\n");
-  for(x=0; x<3; x++) //de 0 a 2, pelo nível de dificuldade
-  {
-    i=0;    
-    do{
-      valor++;
-    fprintf(arquivo_final, "\n%d. %s\n", valor, questoes[i].enunciado);
-      
-        for(num =0 ; num <4 ; num++)
-        {
-          letras = altParaChar(num);   
-          fprintf(arquivo_final, "%c) %s\n", letras, questoes[i].alternativas[num]);
-        }
-        i++;     
-      } while (i < quant_vet [x]); //percorre a quantidade de perguntas do nível de dificuldade estabelecido conforme indicada no início
-  }
+	arquivo_final = fopen ("Prova.txt", "wt");
+	gabarito = fopen ("Gabarito.txt", "wt");
+	
+	fprintf(gabarito, "GABARITO\n\n");
+	for(x=0; x<3; x++){ //de 0 a 2, pelo nível de dificuldade
+		i=0;
+		do{
+			alt = altParaChar(questoes[i].respostaCerta);
+			switch(x)
+			{
+				case 0:
+			    		letras = 'F';
+			    		break;
+			 	case 1:
+			   		letras = 'M';
+			    		break;
+				case 2:
+					letras =  'D';
+					break;
+			}
+			fprintf(gabarito, "%d (%c) - %c\n", numero_questao_gab+1, letras, alt); //impressão do gabarito no arquivo
+			i++;
+			numero_questao_gab++;
+     		} while (i < quant_vet [x]); //percorre a quantidade de perguntas do nível de dificuldade estabelecido conforme indicada no início
+	}
+	
+	fprintf(arquivo_final, "PROVA\n\nNome: ____________________________\tTurma: ___________\tData: ____/____/_______\n");
+	for(x=0; x<3; x++){ //de 0 a 2, pelo nível de dificuldade
+		i=0;
+		do{
+			valor++;
+			fprintf(arquivo_final, "\n%d. %s\n", valor, questoes[i].enunciado);
+			for(num =0 ; num <4 ; num++){
+				letras = altParaChar(num);
+				fprintf(arquivo_final, "%c) %s\n", letras, questoes[i].alternativas[num]);
+			}
+			i++;
+		} while (i < quant_vet [x]); //percorre a quantidade de perguntas do nível de dificuldade estabelecido conforme indicada no início
+	}
 }
 
-//Free para todos vetores alocados dinamicamente
-//Autor: Luísa
-void liberar(struct Questao *questoes, int qtdQuestoes)
-{
-   int i=0, x=0;
-   for(; x<qtdQuestoes; x++)
-   {
-    free(questoes[x].enunciado);
-      for (; i<4; i++)
-      {
-        free(questoes[x].alternativas[i]);
-      }
-   }
-   free(questoes);    
+/* Free para todos vetores alocados dinamicamente
+ * Autor: Luísa; */
+void liberar(struct Questao *questoes, int qtdQuestoes){
+	int i=0, x=0;
+	for(; x<qtdQuestoes; x++){
+		free(questoes[x].enunciado);
+		for (; i<4; i++){
+			free(questoes[x].alternativas[i]);
+		}
+	}
+	free(questoes);
 }
-
+/* três mosqueteiros. Um por todos e todos por um
+* Autores: Ana, Léo Hardt e Luísa; */
 int main(){
-  setlocale(LC_ALL, "Portuguese");
-
+	setlocale(LC_ALL, "Portuguese");
+	
 	struct Questao * questoes;
 	int qtdQuestoes, quant_vet[3], numItens,x;
 
@@ -342,13 +314,12 @@ int main(){
 	doArquivo(&questoes, &qtdQuestoes);	
 	embaralhar (quant_vet,questoes,numItens);
 	
-	if( qtdQuestoes != 0)
-	{
+	if( qtdQuestoes != 0){
 		imprimir(quant_vet, questoes);
-    liberar(questoes, qtdQuestoes);
+		liberar(questoes, qtdQuestoes);
+		printf("Arquivos prontos!\n\nProcure por Prova.txt e Gabarito.txt em sua pasta de arquivos.");
 	}
-	else
-	{
+	else{
 		printf("Erro no arquivo");
 	}
 	return 0;
