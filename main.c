@@ -277,7 +277,7 @@ void embaralhar (int quant_vet[],struct Questao questoes[], int numItens)
 
 /*Impressão dos arquivos.
 Autor: Luísa */
-void imprimir (int quant_vet [], struct Questao questoes [], int numItens)
+void imprimir (int quant_vet [], struct Questao questoes [])
 {
 		FILE *arquivo_final, *gabarito;
 		int i=0, x, contador=0, numero_questao_gab =0, num=0, valor=0;
@@ -286,29 +286,31 @@ void imprimir (int quant_vet [], struct Questao questoes [], int numItens)
 		arquivo_final = fopen ("Prova.txt", "wt");
 		gabarito = fopen ("Gabarito.txt", "wt");
 
-	    fprintf(gabarito, "GABARITO\n\n"); 
-	
-		for(x=0; x<numItens; x++)
-		{
-			alt = altParaChar(questoes[x].respostaCerta);
-			fprintf(gabarito, "%d - %c\n", numero_questao_gab+1, alt); //impressão do gabarito no arquivo
-			i++;
-			numero_questao_gab++;
-		}
+    fprintf(gabarito, "GABARITO\n\n"); 
 
-  		fprintf(arquivo_final, "PROVA\n\nNome: ____________________________\tTurma: ___________\tData: ____/____/_______\n");
-		for(x=0; x<numItens; x++) 
-		{
-			valor++;
-			fprintf(arquivo_final, "\n%d. %s\n", valor, questoes[x].enunciado);
-		
-			for(num =0 ; num <4 ; num++)
-			{
-				letras = altParaChar(num);   
-				fprintf(arquivo_final, "%c) %s\n", letras, questoes[x].alternativas[num]);
-			}
-		}
-}
+  for(x=0; x<3; x++) //de 0 a 2, pelo nível de dificuldade
+  {
+    i=0;
+      do{
+        alt = altParaChar(questoes[i].respostaCerta);
+        switch(x)
+        {
+          case 0:
+            letras = 'F';
+            break;
+          case 1:
+            letras = 'M';
+            break;
+          case 2:
+            letras =  'D';
+            break;
+        }
+        fprintf(gabarito, "%d (%c) - %c\n", numero_questao_gab+1, letras, alt); //impressão do gabarito no arquivo
+        i++;
+        numero_questao_gab++;
+      } while (i < quant_vet [x]); //percorre a quantidade de perguntas do nível de dificuldade estabelecido conforme indicada no início
+  }
+
 
 int main(){
   setlocale(LC_ALL, "Portuguese");
