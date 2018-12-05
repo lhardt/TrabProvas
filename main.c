@@ -127,7 +127,6 @@ void doArquivo(struct Questao ** vetQuestoes, int * qtd){
 /* A ordem das questões e das alternativas. Use como o índice da lista
  * Autor: Ana; */
 int *criarOrdemAleatoria(int numItens, int numMin, int numMax){
-	srand((unsigned)time(NULL));
 	
 	int y,x,*usado,*novo_indice;
 
@@ -298,6 +297,9 @@ void liberar(struct Questao *questoes, int qtdQuestoes){
 * Autores: Ana, Léo Hardt e Luísa; */
 int main(){
 	setlocale(LC_ALL, "Portuguese");
+	
+	srand(time(NULL));
+	
 	
 	struct Questao * questoes;
 	int qtdQuestoes, quant_vet[3], numItens,x;
