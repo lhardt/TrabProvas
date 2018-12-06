@@ -60,7 +60,7 @@ char * ateTerminador(FILE * f, char * terminators)  {
 	int strLen = 0; /* Tamanho de str */
 	int i = 0;
 	char * str = calloc(1, sizeof(char));
-	char * linha = calloc( TAM_MAX_LINHA, sizeof(char));
+	char * linha = calloc( 1 + TAM_MAX_LINHA, sizeof(char));
 	while( !feof(f) && strchr(terminators,fpeek(f)) == NULL ) {
 		fgets(linha, TAM_MAX_LINHA, f);
 		strLen += strlen(linha);
@@ -82,7 +82,7 @@ char * ateTerminador(FILE * f, char * terminators)  {
 char * removerCabecalho(char * str){
 	int i = 0, len = strlen(str);
 	for( i = 2; i <= len; i++){
-		str[i-2] = str[i]; 
+		str[i-2] = str[i];
 	}
 	return str;
 }
@@ -96,7 +96,7 @@ void doArquivo(struct Questao ** vetQuestoes, int * qtd){
 	*qtd = 0; int dummy = 0;
 	*vetQuestoes = (struct Questao*) calloc(numQstAlocado,sizeof(struct Questao));;
 	if( entrada == NULL || *vetQuestoes == NULL ){
-		printf("Sem memória! Encerrando o programa...\n");
+		printf("Sem memória! Encerrando o programa... Função doArquivo\n");
 		exit(-1);
 	}
 	while( !feof(entrada) ){
@@ -105,7 +105,7 @@ void doArquivo(struct Questao ** vetQuestoes, int * qtd){
 			numQstAlocado += 10;
 			*vetQuestoes = (struct Questao*) realloc(*vetQuestoes, numQstAlocado * sizeof(struct Questao));
 			if(*vetQuestoes == NULL ) {
-				printf("Sem memória! Encerrando o programa...\n");
+				printf("Sem memória! Encerrando o programa... Função doArquivo\n");
 				exit(-2);
 			}
 		}
@@ -127,26 +127,28 @@ void doArquivo(struct Questao ** vetQuestoes, int * qtd){
 /* A ordem das questões e das alternativas. Use como o índice da lista
  * Autor: Ana; */
 int *criarOrdemAleatoria(int numItens, int numMin, int numMax){
-	
+
 	int y,x,*usado,*novo_indice;
 
 	usado = (int*)calloc(numItens, sizeof(int));//indice não usado=0, usado=1
 	novo_indice = (int*)malloc(numItens*sizeof(int));
 	if( novo_indice == NULL ){
+		printf("Sem memória! Encerrando o programa..."
+			   " Função criarOrdemAletoria.\n");
 		exit(4);
 	}
 	for (x=0;x<numItens;x++){
-		novo_indice[x] = numMin+ (rand() % abs(numMax-numMin));//sorteia
+		novo_indice[x] = numMin + (rand() % abs(numMax-numMin));//sorteia
 	    do{
 	        usado[x]=0;
 	        for (y=0;y<x;y++){//percorre vetor novo_indice até a quantidade de indices já sorteados
 	        	if (novo_indice[x]==novo_indice[y]){//se o valor do recem sorteado for igual a outro sorteado anteriormente, continua sorteando até que aconteca o contrario
 	        		usado[x] = 1;
-	        		novo_indice[x] = numMin+ (rand() % abs(numMax-numMin));
+	        		novo_indice[x] = numMin + (rand() % abs(numMax-numMin));
 			}
-		}            
+		}
 	    }while(usado[x]==1);
-	}	
+	}
     return  novo_indice;
 }
 
@@ -156,41 +158,71 @@ void embaralharAlternativas(struct Questao *pQuestao){
 	int x,y, tam, *indice;
 	char *novaOrdem[4];
 	indice = criarOrdemAleatoria(4, 0, 4);// quantidade,valor min, valor max
-    
+
 	for (x=0; x<4;x++){//copia altermativas para vetor auxiliar
 		tam = strlen ((*pQuestao).alternativas[indice[x]]);
 		novaOrdem[x] = (char*) malloc (tam*sizeof(char));
 		if(novaOrdem[x]==NULL){
+			printf("Sem memória! Encerrando o programa..."
+				   " Função embaralharAlternativas.\n");
 			exit(2);
-		}		
-		strcpy (novaOrdem[x], (*pQuestao).alternativas[indice[x]]);		
-				
+		}
+		strcpy (novaOrdem[x], (*pQuestao).alternativas[indice[x]]);
+
 		if (indice[x]==0){//muda a alternativa que contem a resposta
 			(*pQuestao).respostaCerta= x;
 		}
 	}
 	for (y=0;y<4;y++){//copia alternativas pra sua posição final no vetor
 		tam = strlen (novaOrdem[y]);
-		
+
 		free ((*pQuestao).alternativas[y]);
 		(*pQuestao).alternativas[y] = (char*) malloc (tam*sizeof(char));
-		
+
 		strcpy ((*pQuestao).alternativas[y],novaOrdem[y]);
+	}
+}
+/* Calcular o primeiro índice das questões fáceis, médias e difíceis.
+ * Retorna para índices por referência.
+ * Autor: Léo H.;*/
+void calcularPosicoes(struct Questao questoes[], int qtdQuestoes, int indices[]) {
+	/* A dificuldade que ele vê atualmente. Começa pelas fáceis */
+	int diff = 'F';
+	int i = 0;
+	/* O número de dificuldades diferentes que já encontrou.
+	 * Usado de indice para o vetor indices */
+	int diffs = 1;
+	/* O primeiro nível é fácil e começa em zero; */
+	indices[0] = 0;
+	for(; i < qtdQuestoes; i ++ ){
+		if(questoes[i].dificuldade != diff){
+			diff = questoes[i].dificuldade;
+			indices[diffs] = i;
+			diffs++;
+		}
 	}
 }
 
 /* Embaralha as questões de acordo com o índice de *criarOrdemAleatoria()
  * Autor: Ana; */
-void embaralhar (int quant_vet[],struct Questao questoes[], int numItens)
+void embaralhar (int quant_vet[],struct Questao questoes[], int numQuestoes)
 {
-	int *indMedio, *indDificil, *indice,x,y,tam, tamAlt;
+
+	int *indice, *indMedio, *indDificil,x,y,tam, tamAlt;
+	/* Número total de itens que foram embaralhados */
+	int numItens = quant_vet[0]+quant_vet[1]+quant_vet[2];
+	/* Índice inicial de cada dificuldade */
+	int comecaEm[3] = {0,0,0};
+	calcularPosicoes(questoes, numQuestoes, comecaEm );
+	printf("Começa em: %d %d %d\n", comecaEm[0], comecaEm[1], comecaEm[2]);
+	/* A nova ordem de questões (com suas respectivas alternativas). */
 	char *novaOrdem[numItens], *novaAlternativa[numItens][4];
-	
+
 	// Chama a funcao para criar um indice para cada uma das especificações de quantidade e nivel
-	indice = criarOrdemAleatoria (quant_vet[0],0,40);
-	indMedio = criarOrdemAleatoria (quant_vet[1],40,80);
-	indDificil = criarOrdemAleatoria (quant_vet[2],80,120);
-	
+	indice = criarOrdemAleatoria (quant_vet[0],comecaEm[0],comecaEm[1]);
+	indMedio = criarOrdemAleatoria (quant_vet[1],comecaEm[1],comecaEm[2]);
+	indDificil = criarOrdemAleatoria (quant_vet[2],comecaEm[2],numQuestoes);
+
 	//Junta todos os indices em um só, no indice de perguntas faceis
 	for (x=0;x<quant_vet[2];x++)
 	{
@@ -210,7 +242,7 @@ void embaralhar (int quant_vet[],struct Questao questoes[], int numItens)
 	}
 	//Copia enunciado e alternativa para variável auxiliar
 	for (x=0; x<numItens;x++){
-
+		printf("\n\n\nLINHA %d, x= %d, indX = %d, questoes[indX] %p\n", __LINE__, x, indice[x],  questoes[indice[x]].enunciado);
 		tam = strlen (questoes[indice[x]].enunciado);
 		novaOrdem[x] = (char*) malloc (tam*sizeof(char));
 		if(novaOrdem[x]==NULL){
@@ -252,14 +284,13 @@ void imprimir (int quant_vet [], struct Questao questoes []){
 
 	arquivo_final = fopen ("Prova.txt", "wt");
 	gabarito = fopen ("Gabarito.txt", "wt");
-	
+
 	fprintf(gabarito, "GABARITO\n\n");
-	
+
 	fprintf(arquivo_final, "PROVA\n\nNome: ____________________________\tTurma: ___________\tData: ____/____/_______\n");
 	//de 0 a 2, pelo nível de dificuldade
-	
-	for(x=0; x<3; x++){ 
-		printf("A %d CORNO\n", x ); 
+
+	for(x=0; x<3; x++){
 		quantVetTotal += quant_vet[x];
 		//percorre a quantidade de perguntas do nível de dificuldade estabelecido conforme indicada no início
 		while (i < quantVetTotal){
@@ -269,7 +300,7 @@ void imprimir (int quant_vet [], struct Questao questoes []){
 				letras = altParaChar(num);
 				fprintf(arquivo_final, "%c) %s\n", letras, questoes[i].alternativas[num]);
 			}
-			// ARQUIVO GABARITO!			
+			// ARQUIVO GABARITO!
 			alt = altParaChar(questoes[i].respostaCerta);
 			switch(x)
 			{
@@ -285,7 +316,7 @@ void imprimir (int quant_vet [], struct Questao questoes []){
 			}
 			fprintf(gabarito, "%d (%c) - %c\n", i+1, letras, alt); //impressão do gabarito no arquivo
 			i++;
-		} 
+		}
 	}
 }
 
@@ -304,14 +335,18 @@ void liberar(struct Questao *questoes, int qtdQuestoes){
 /* três mosqueteiros. Um por todos e todos por um
 * Autores: Ana, Léo Hardt e Luísa; */
 int main(){
-	setlocale(LC_ALL, "Portuguese");
-	
-	srand(time(NULL));
-	
-	
+	/* O vetor de todas as questões que o programa leu do arquivo. */
 	struct Questao * questoes;
-	int qtdQuestoes, quant_vet[3], numItens,x;
+	/* A quantidade de questões lidas pelo arquivo */
+	int qtdQuestoes;
+	/* A quantidade de questões solicitadas pelo usuário */
+	int quant_vet[3];
 
+	setlocale(LC_ALL, "Portuguese");
+
+	srand(time(NULL));
+
+	// TODO: transferir para outra função
 	printf("Informe a quantidade de questões: \n");
 	printf("Nível Fácil: ");
 	scanf("%d", &quant_vet[0]);
@@ -319,14 +354,13 @@ int main(){
 	scanf("%d", &quant_vet[1]);
 	printf("Nível Difícil: ");
 	scanf("%d", &quant_vet[2]);
-	numItens = quant_vet[0]+quant_vet[1]+quant_vet[2];
-		
-	doArquivo(&questoes, &qtdQuestoes);	
-	embaralhar (quant_vet,questoes,numItens);
-	
+
+	doArquivo(&questoes, &qtdQuestoes);
+	embaralhar (quant_vet,questoes, qtdQuestoes);
+
 		printf("DIFF DECIMA %c\n", questoes[10].dificuldade);
 
-	
+
 	if( qtdQuestoes != 0){
 		imprimir(quant_vet, questoes);
 		liberar(questoes, qtdQuestoes);
