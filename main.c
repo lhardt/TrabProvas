@@ -254,7 +254,7 @@ void embaralhar (int quant_vet[],struct Questao questoes[], int numQuestoes){
 			exit(3);
 		}
 		strcpy (questoes[x].enunciado, novaOrdem[x]);
-		//free (novaOrdem[x]);
+		free (novaOrdem[x]);
 		for (y=0;y<4;y++){ //parte das alternativas
 			tamAlt = strlen (novaAlternativa[x][y]);
 			free (questoes[x].alternativas[y]);
@@ -264,7 +264,7 @@ void embaralhar (int quant_vet[],struct Questao questoes[], int numQuestoes){
 				exit(3);
 			}
 			strcpy (questoes[x].alternativas[y], novaAlternativa[x][y]);
-			//free (novaAlternativa[x][y]);
+			free (novaAlternativa[x][y]);
 		}
 		embaralharAlternativas(&questoes[x]);//Chama funcao para embaralhar alternativas dessa questao
 	}
